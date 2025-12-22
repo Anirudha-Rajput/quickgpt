@@ -2,6 +2,8 @@ const bcrypt = require("bcrypt")
 const userModel = require("../models/user.model")
 const JWT = require("jsonwebtoken")
 const chatModel = require("../models/chat.model")
+
+// register api
 const registerController = async (req, res) => {
     try {
         let { name, email, password } = req.body
