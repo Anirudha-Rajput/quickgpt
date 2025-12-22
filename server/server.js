@@ -12,7 +12,7 @@ const creditRoutes = require("./routes/credits.routes");
 const stripeWebHooks = require("./controllers/webHooks");
 
 connectDb();    // database connect
-app.post("/api/stripe",express.raw({type:"application/json"}),stripeWebHooks)
+app.post("/api/stripe/",express.raw({type:"application/json"}),stripeWebHooks)
 //middlewares
 app.use(express.json())
 app.use(cors())
