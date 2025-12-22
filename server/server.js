@@ -12,7 +12,7 @@ const creditRoutes = require("./routes/credits.routes");
 const stripeWebHooks = require("./controllers/webHooks");
 
 connectDb();    // database connect
-app.post("/api/stripe",express.raw({type:"application/json"}),stripeWebHooks)
+app.post("/api/stripe/",express.raw({type:"application/json"}),stripeWebHooks)
 //middlewares
 app.use(express.json())
 app.use(cors())
@@ -22,7 +22,7 @@ app.use("/api/user/auth", authRoutes)
 app.use("/api/chat/", chatRoutes)
 app.use("/api/message/", messageRoutes)
 app.use("/api/credits/",creditRoutes)
-app.get("/test", (req, res) => {
-  res.send("backend working")
+app.get("/", (req, res) => {
+  res.send("server is live")
 })
 app.listen(PORT, () => { console.log(`server is running on port ${PORT}`) })  // server start
