@@ -23,6 +23,10 @@ app.use("/api/chat/", chatRoutes)
 app.use("/api/message/", messageRoutes)
 app.use("/api/credits/",creditRoutes)
 app.get("/", (req, res) => {
+<<<<<<< HEAD
   res.send("server is running")
+=======
+  res.send("server is live")
+>>>>>>> 5b688ea061034da567e0019dfc5cdba18e695795
 })
 app.listen(PORT, () => { console.log(`server is running on port ${PORT}`) })  // server start
