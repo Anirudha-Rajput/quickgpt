@@ -48,7 +48,7 @@ const purchasePlanController = async (req,res) => {
         console.log(origin)
         const { planId } = req.params
         const userId = req.user._id;
-        const plan = plans.find((plan) => plan._id === planId)
+        const plan = plans.find(plan => plan._id === planId)
         if (!plan) return res.status(404).json({
             message: "invalid plan"
         })
@@ -85,8 +85,9 @@ const purchasePlanController = async (req,res) => {
         });
        console.log(session)
 
-        return res.status(200).json({
-            message: "payment successfull",
+         res.json({
+            success:true,
+            message: "Checkout session created",
             url: session.url
 
         })

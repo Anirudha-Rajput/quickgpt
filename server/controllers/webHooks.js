@@ -2,9 +2,9 @@ const Stripe = require("stripe");
 const transactionModel = require("../models/transaction.model");
 const userModel = require("../models/user.model");
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 const stripeWebHooks = async (req, res) => {
+    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);    
     const sig = req.headers["stripe-signature"];
     let event;
 
@@ -20,7 +20,7 @@ const stripeWebHooks = async (req, res) => {
 
     try {
         switch (event.type) {
-            case "payment_intent_succeeded": {
+            case "payment_intent.succeeded": {
                 const paymentIntent = event.data.object;
 
                 const sessionList = await stripe.checkout.sessions.list({
@@ -35,30 +35,34 @@ const stripeWebHooks = async (req, res) => {
                         _id: transactionId,
                         isPaid: false
                     });
-                  // Update credits in user account
+                    // if (!transaction) {
+                    //     return res.json({ received: true, message: "Transaction already processed" });
+                    // }
+                    // Update credits in user account
                     await userModel.updateOne(
                         { _id: transaction.userId },
                         { $inc: { credits: transaction.credits } }
                     );
-                 // updates cedits payment status
+                    // updates credits payment status
                     transaction.isPaid = true;
                     await transaction.save();
                 }
-                else{
+                else {
                     return res.json({
-                        received:true,message:"ignored event:invalid app"
+                        received: true, message: "ignored event:invalid app"
                     })
                 }
                 break;
             }
 
-            default:console.log("unhandled event type:",event.type)
+            default: console.log("unhandled event type:", event.type)
                 break;
         }
 
-         return res.status(200).json({ received: true });
+        return res.status(200).json({ received: true });
 
     } catch (error) {
+        console.log("error in webhook controller ->",error)
         return res.status(500).json({
             message: "internal server error",
             error: error.message
