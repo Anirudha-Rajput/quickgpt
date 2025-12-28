@@ -12,16 +12,22 @@ const creditRoutes = require("./routes/credits.routes");
 const stripeWebHooks = require("./controllers/webHooks");
 
 connectDb();    // database connect
-app.post("/api/stripe",express.raw({type:"application/json"}),stripeWebHooks)
-//middlewares
-app.use(express.json())
-app.use(cors())
+app.post("/api/stripe", express.raw({ type:"application/json" }), stripeWebHooks)
+app.use(
+  cors({
+    origin: "http://localhost:5173",
+    credentials: true,
+  })
+);
+
 app.use(cookieParser())
+app.use(express.json())
+//middlewares
 
 app.use("/api/user/auth", authRoutes)
 app.use("/api/chat/", chatRoutes)
 app.use("/api/message/", messageRoutes)
-app.use("/api/credits/",creditRoutes)
+app.use("/api/credits/", creditRoutes)
 app.get("/", (req, res) => {
   res.send("server is running")
 })

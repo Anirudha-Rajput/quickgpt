@@ -1,34 +1,70 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { dummyPlans } from "../src/assets/assets";
 import Loading from "./Loading";
+import { AppContextData } from "../context/AppContext";
+import toast from "react-hot-toast";
 
 const Credits = () => {
+  const { axios } = useContext(AppContextData)
   const [plans, setPlans] = useState(null);
   const [loading, setLoading] = useState(true);
   const fetchPlans = async () => {
-    setPlans(dummyPlans);
+
+    try {
+      const { data } = await axios.get("/api/credits/plans")
+      
+      if (data) {
+        setPlans(data.plans);
+
+      }
+      else {
+        toast.error(data.message)
+      }
+    } catch (error) {
+      toast.error(error.message)
+    }
     setLoading(false);
   };
   useEffect(() => {
     fetchPlans();
   }, []);
+ 
+  const purchasePlan=async(planId)=>{
+    try {
+      const {data}=await axios.post(`/api/credits/purchase/${planId}`)
+      console.log(data)
+     if(data){
+      window.location.href=data.url
+     }
+     else{
+      toast.error(data.message)
+    }
+  } catch (error) {
+      toast.error(error.message)
+      
+    }
+  }
+
+
+
+
   if (loading) return <Loading />;
   return (
     <div className="h-screen max-w-7xl px-4 sm:px-6 lg:px-8 py-12 overflow-y-scroll mx-auto">
       <h2 className="text-3xl font-semibold text-center mb-10 xl:mt-30 text-gray-800 dark:text-white">
-        {" "}
+
         Credit Plans
       </h2>
       <div className="flex flex-wrap justify-center gap-8">
-        {plans.map((plan) => (
+        {plans?.map((plan) => (
           <div
             key={plan._id}
-            className={`border border-gray-200 dark:border-purple-700 rounded-lg shadow hover:shadow-lg transition-shadow p-6 min-w-[300px] flex flex-col ${
-              plan._id === "pro"
-                ? "bg-purple-50 dark:bg-purple-900"
-                : "bg-white dark:bg-transparent"
-            }`}
+            className={`border border-gray-200 dark:border-purple-700 rounded-lg shadow hover:shadow-lg transition-shadow p-6 min-w-[300px] flex flex-col ${plan._id === "pro"
+              ? "bg-purple-50 dark:bg-purple-900"
+              : "bg-white dark:bg-transparent"
+              }`}
           >
+               { console.log(plan._id)}
             <div className="flex-1 ">
               <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2 ">
                 {" "}
@@ -46,7 +82,7 @@ const Credits = () => {
                 ))}
               </ul>
             </div>
-            <button className="mt-6 bg-purple-600 hover:bg-purple-700 active:bg-purpIe-800 text-white font-medium py-2 rounded transition-colors cursor-pointer">
+            <button onClick={()=>purchasePlan(plan._id)} className="mt-6 bg-purple-600 hover:bg-purple-700 active:bg-purpIe-800 text-white font-medium py-2 rounded transition-colors cursor-pointer">
               Buy Now
             </button>
           </div>

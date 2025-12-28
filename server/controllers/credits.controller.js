@@ -28,8 +28,7 @@ const plans = [
 const getPlansController = async (req, res) => {
     try {
         return res.status(200).json({
-            plan: plans,
-            message: "hey"
+            plans: plans,
         })
     } catch (error) {
         console.log("error in ", error)
@@ -42,10 +41,11 @@ const getPlansController = async (req, res) => {
 
 // stripe instance
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY)
-const purchasePlanController = async (req,res) => {
+
+const purchasePlanController = async (req, res) => {
+    console.log("chali")
     try {
         const origin = req.headers.origin;
-        console.log(origin)
         const { planId } = req.params
         const userId = req.user._id;
         const plan = plans.find(plan => plan._id === planId)
@@ -55,12 +55,13 @@ const purchasePlanController = async (req,res) => {
 
 
         const transaction = await transactionModel.create({
-            userId,
+            userId: userId,
             planId: plan._id,
             amount: plan.price,
             credits: plan.credits,
             isPaid: false
         })
+
         const session = await stripe.checkout.sessions.create({
             line_items: [
                 {
@@ -78,16 +79,13 @@ const purchasePlanController = async (req,res) => {
             mode: 'payment',
             success_url: `${origin}/loading`,
             cancel_url: `${origin}`,
-            metadata: { transactionId: transaction._id.toString()  , appId:"quickgpt",}
-            ,
-         
+            metadata: { transactionId: transaction._id.toString(), appId: "quickgpt", },
             expires_at: Math.floor(Date.now() / 1000) + 30 * 60,  // expires in 30 min
         });
-       console.log(session)
 
-         res.json({
-            success:true,
-            message: "Checkout session created",
+
+        return res.status(200).json({
+             message: "Checkout session created",
             url: session.url
 
         })

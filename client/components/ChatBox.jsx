@@ -2,10 +2,11 @@ import React, { useContext, useEffect, useRef, useState } from "react";
 import { assets } from "../src/assets/assets";
 import { AppContextData } from "../context/AppContext";
 import Message from "./Message";
+import toast from "react-hot-toast";
 
 const ChatBox = () => {
-  const containerRef=useRef(null)
-  const { selectedChat, theme } = useContext(AppContextData);
+  const containerRef = useRef(null)
+  const { selectedChat, theme, user, setUser, axios } = useContext(AppContextData);
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(false);
   const [mode, setMode] = useState("text");
@@ -17,19 +18,55 @@ const ChatBox = () => {
     }
   }, [selectedChat]);
   const onSubmit = async (e) => {
-    e.preventDefault();
+    try {
+      e.preventDefault();
+      if (!user) return toast("login to send message")
+      setLoading(true)
+      const promptCopy = prompt
+      setprompt('')
+      setMessages(prev => [...prev, { role: "user", content: prompt, timestamp: Date.now(), isImage: false }])
+      const { data } = await axios.post(`/api/message/${mode}/${selectedChat._id}`, { prompt, isPublished })
+      if (data) {
+        setMessages(prev => [...prev, data.reply])
+        // decrease credits
+        if (mode === 'text') {
+          setUser(prev => ({ ...prev, credits: prev.credits - 2 }))
+        }
+        else {
+          setUser(prev => ({ ...prev, credits: prev.credits - 1 }))
+
+        }
+      }
+      else{
+        toast.error(data.message)
+        setprompt(promptCopy)
+      }
+    } catch (error) {
+      toast.error(error.message)
+      console.log("error", error)
+
+    }finally{
+        setprompt('')
+        setLoading(false)
+      }
   };
+
   useEffect(()=>{
-    if(containerRef.current){
+    if(selectedChat){
+      setMessages(selectedChat.messages)
+    }
+  },[selectedChat])
+  useEffect(() => {
+    if (containerRef.current) {
       containerRef.current.scrollTo({
-        top:containerRef.current.scrollHeight,
-        behavior:"smooth"
+        top: containerRef.current.scrollHeight,
+        behavior: "smooth"
       })
     }
-  },[messages])
+  }, [messages])
   return (
     <>
-     
+
       <div className="flex-1  flex flex-col justify-between  m-5 md:m-10 xl:mx-30 max-md:mt-14 2xl:pr-40">
         {/*chat messages*/}
         <div ref={containerRef} className="flex-1  mb-5 overflow-y-scroll">
@@ -58,12 +95,12 @@ const ChatBox = () => {
             </div>
           )}
         </div>
-        {mode==="image"&& (<label className="mx-auto inline-flex text-xs items-center gap-2 mb-3">
+        {mode === "image" && (<label className="mx-auto inline-flex text-xs items-center gap-2 mb-3">
           <p>publish this image to community</p>
-          <input type="checkbox" checked={isPublished} onChange={(e)=>setIsPublished(e.target.checked)} />
+          <input type="checkbox" checked={isPublished} onChange={(e) => setIsPublished(e.target.checked)} />
         </label>)}
         {/* promt input*/}
-        <form onSubmit={onSubmit} className= ' bg-primary/20 dark:bg-[#583C79]/30 border border-primary dark:border-[80609F]/30 rounded-full w-full max-w-2xl p-3 pl-4 mx-auto flex gap-4 items-center' >
+        <form onSubmit={onSubmit} className=' bg-primary/20 dark:bg-[#583C79]/30 border border-primary dark:border-[80609F]/30 rounded-full w-full max-w-2xl p-3 pl-4 mx-auto flex gap-4 items-center' >
           <select
             onClick={(e) => {
               setMode(e.target.value);

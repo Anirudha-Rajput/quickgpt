@@ -15,8 +15,13 @@ const registerController = async (req, res) => {
         const newUser = await userModel.create({
             name, email, password
         })
-        let token = JWT.sign({ id: newUser._id }, process.env.JWT_SECRET, { expiresIn: "30d" })
-        res.cookie("token", token);
+        let token = JWT.sign({ id: newUser._id }, process.env.JWT_SECRET, { expiresIn: "30m" })
+        res.cookie("token", token, {
+            httpOnly: true,
+            sameSite: "lax",
+            secure: false, // true in production
+            maxAge: 7 * 24 * 60 * 60 * 1000,
+        });
         return res.status(201).json({
             message: "user registered successfully",
             user: newUser
@@ -29,7 +34,7 @@ const registerController = async (req, res) => {
             error: error
         })
     }
-   
+
 }
 
 const loginController = async (req, res) => {
@@ -50,7 +55,12 @@ const loginController = async (req, res) => {
         })
 
         let token = JWT.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "30m" })
-        res.cookie("token", token)
+        res.cookie("token", token, {
+            httpOnly: true,
+            sameSite: "lax",
+            secure: false, // true in production
+            maxAge: 7 * 24 * 60 * 60 * 1000,
+        });
         return res.status(201).json({
             message: "user logged in successfully",
             user: user
@@ -63,6 +73,25 @@ const loginController = async (req, res) => {
         })
     }
 }
+
+const logoutController = async (req, res) => {
+    try {
+        res.clearCookie("token", {
+            httpOnly: true,
+            sameSite: "lax",
+            secure: false, // true in production (https)
+        });
+
+        return res.status(200).json({
+            message: "Logged out successfully"
+        });
+    } catch (error) {
+        return res.status(500).json({
+            message: "Logout failed",
+            error: error.message
+        });
+    }
+};
 
 const getUserController = async (req, res) => {
     try {
@@ -87,7 +116,7 @@ const getPublishedImages = async (req, res) => {
             { $unwind: "$messages" },
             {
                 $match: {
-                    "messages.islmage": true,
+                    "messages.isImage": true,
                     "messages.isPublished": true
                 }
             },
@@ -103,9 +132,11 @@ const getPublishedImages = async (req, res) => {
             images: publishedImageMessages.reverse()
         })
     } catch (error) {
+        console.log(error)
         return res.status(500).json({
-            error: error
+            message: "Failed to fetch published images",
+            error: error.message
         })
     }
 }
-module.exports = { registerController, loginController, getUserController,getPublishedImages }
+module.exports = { registerController, loginController, logoutController, getUserController, getPublishedImages }

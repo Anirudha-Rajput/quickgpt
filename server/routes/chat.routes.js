@@ -3,7 +3,7 @@ const { createChatController, deleteChatController, getChatController } = requir
 const authMiddleware = require("../middlewares/userAuthMiddleware");
 const router = express.Router();
 
-router.post("/create",authMiddleware, createChatController)
+router.get("/create",authMiddleware, createChatController)
 router.get("/get",authMiddleware, getChatController)
 router.delete("/delete/:chatId",authMiddleware, deleteChatController)
 

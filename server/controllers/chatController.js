@@ -1,6 +1,7 @@
 const chatModel = require("../models/chat.model");
 
 const createChatController = async (req, res) => {
+    console.log("chali")
     try {
         const userId = req.user._id
         console.log(req.user)
@@ -40,7 +41,7 @@ const getChatController = async (req, res) => {
         const chats = await chatModel.find({ userId }).sort({ updateAt: -1 })
         return res.status(201).json({
             message: "chat fetched",
-            
+            chat:chats
         })
 
     } catch (error) {

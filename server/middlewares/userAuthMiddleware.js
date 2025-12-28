@@ -2,9 +2,9 @@ const JWT = require("jsonwebtoken");
 const userModel = require("../models/user.model");
 const authMiddleware = async (req, res, next) => {
     try {
-        let token = req.cookies.token;
-
-        if (!token) return res.status(401).json({
+        let   token = req.cookies.token;
+    console.log(token)
+        if (!token) return res.status(404).json({
             message: "token not found"
         })
         let decode = JWT.verify(token, process.env.JWT_SECRET)

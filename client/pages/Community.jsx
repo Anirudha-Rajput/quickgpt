@@ -1,19 +1,33 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import Credits from "./Credits";
 import { dummyPublishedImages } from "../src/assets/assets";
 import Loading from "./Loading";
+import { AppContextData } from "../context/AppContext";
+import toast from "react-hot-toast";
 
 const Community = () => {
   const [images, setImages] = useState([]);
   const [loading, setLoading] = useState(true);
-  const fetchimages = async () => {
-    setImages(dummyPublishedImages);
-    setLoading(false);
+  const { axios } = useContext(AppContextData)
+  const fetchImages = async () => {
+    try {
+      const { data } =await axios.get("/api/user/auth/published-images")
+      console.log(data)
+      if (data) {
+        setImages(data.images)
+      }
+    
+
+
+    } catch (error) {
+      toast.error(error.message)
+    }
+    setLoading(false)
   };
   useEffect(() => {
-    fetchimages();
+    fetchImages();
   }, []);
- if(loading) return <Loading/>
+  if (loading) return <Loading />
   return (
     <div className="p-6 pt-12 xl:px-12 2xl:px-20 w-full mx-auto h-full overflow-y-scroll">
       <h2 className="text-xl font-semibold mb-6 text-gray-800 dark:text-purple-100">
