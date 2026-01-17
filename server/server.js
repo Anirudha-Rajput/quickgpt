@@ -13,14 +13,9 @@ const stripeWebHooks = require("./controllers/webHooks");
 
 connectDb();    // database connect
 app.post("/api/stripe", express.raw({ type:"application/json" }), stripeWebHooks)
-app.use(
-  cors({
-    origin: "http://localhost:5173",
-    credentials: true,
-  })
-);
+app.use(cors());
 
-app.use(cookieParser())
+// app.use(cookieParser())
 app.use(express.json())
 //middlewares
 

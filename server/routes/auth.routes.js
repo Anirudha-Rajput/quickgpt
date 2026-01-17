@@ -5,8 +5,7 @@ const router=express.Router()
 
 router.post("/register",registerController)
 router.post("/login",loginController)
-router.post("/logout",logoutController)
 router.get("/profile",authMiddleware,getUserController)
-router.get("/published-images",authMiddleware,getPublishedImages)
+router.get("/published-images",getPublishedImages)
 
-module.exports=router;
+module.exports=router;  

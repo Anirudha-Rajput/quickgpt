@@ -3,36 +3,30 @@ import { AppContextData } from "../context/AppContext";
 import { assets } from "../src/assets/assets";
 import moment from "moment";
 import toast from "react-hot-toast";
-import Login from "../pages/Login";
 const Sidebar = ({ isMenuOpen, setIsMenuOpen }) => {
-  const { user, theme, setTheme, chats, setChats, selectedChat, setSelectedChat, navigate, createNewChat, axios, fetchUserChat } = useContext(AppContextData);
+  const { user, theme, setTheme, chats, setChats, selectedChat, setSelectedChat, navigate, createNewChat, axios, fetchUserChat, setToken,token } = useContext(AppContextData);
   const [search, setSearch] = useState("");
-  // console.log(user)
   const logout = async () => {
-    try {
-      const { data } = axios.post("/api/user/auth/logout",{}, { withCredentials: true })
-      console.log(data)
-      toast.success(data.message)
-      navigate("/")
-
-    }
-    catch (error) { toast.error(data.message) }
+    localStorage.removeItem('token')
+    setToken(null)
+    toast.success("logged out successfully")
   }
+
 
   const deleteChat = async (e, chatId) => {
     try {
       e.stopPropagation()
       const confirmData = window.confirm("are you sure want to delete this chat ?")
-      if (!confirmData) return
-      await axios.delete(`/api/chat/delete/${chatId}`);
-
+      if (!confirmData) return;
+      const { data } = await axios.delete(`/api/chat/delete/${chatId}`, { headers: { Authorization: token } });
+      console.log(data)
       // remove chat from state
-      setChats((prev) => prev.filter((chat) => chat._id !== chatId));
-
-      // agar deleted chat selected thi
-      if (selectedChat?._id === chatId) {
-        setSelectedChat(null);
+      if (data.success) {
+        setChats((prev) => prev.filter((chat) => chat._id !== chatId));
+        await fetchUserChat()
+        toast.success(data.message)
       }
+
 
     } catch (error) {
       toast.error("Failed to delete chat");
@@ -94,13 +88,9 @@ const Sidebar = ({ isMenuOpen, setIsMenuOpen }) => {
                   </div>
 
                   <img
-                    onClick={(e) =>
-                      toast.promise(deleteChat(e, chat._id), {
-                        loading: "Deleting...",
-                        success: "Chat deleted",
-                        error: "Delete failed",
-                      })
-                    }
+                    onClick={(e) => {
+                      deleteChat(e, chat._id)
+                    }}
                     src={assets.bin_icon}
                     className="hidden group-hover:block w-4 cursor-pointer not-dark:invert"
                     alt="delete"

@@ -8,17 +8,17 @@ import toast from "react-hot-toast";
 const Community = () => {
   const [images, setImages] = useState([]);
   const [loading, setLoading] = useState(true);
-  const { axios } = useContext(AppContextData)
+  const { axios ,token} = useContext(AppContextData)
   const fetchImages = async () => {
     try {
-      const { data } =await axios.get("/api/user/auth/published-images")
-      console.log(data)
-      if (data) {
+      const { data } = await axios.get("/api/user/auth/published-images")
+  
+      if (data.success) {
         setImages(data.images)
       }
-    
-
-
+      else{
+        toast.error(data.message)
+      }
     } catch (error) {
       toast.error(error.message)
     }

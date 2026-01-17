@@ -27,14 +27,15 @@ const plans = [
 
 const getPlansController = async (req, res) => {
     try {
-        return res.status(200).json({
-            plans: plans,
+        return res.json({
+            success: true,
+            plans
         })
     } catch (error) {
         console.log("error in ", error)
-        return res.status(500).json({
-            error: error,
-            message: "error in getting plan"
+        return res.json({
+            success: false,
+            message: error.message
         })
     }
 }
@@ -49,7 +50,8 @@ const purchasePlanController = async (req, res) => {
         const { planId } = req.params
         const userId = req.user._id;
         const plan = plans.find(plan => plan._id === planId)
-        if (!plan) return res.status(404).json({
+        if (!plan) return res.json({
+            success: false,
             message: "invalid plan"
         })
 
@@ -85,11 +87,12 @@ const purchasePlanController = async (req, res) => {
 
 
         return res.status(200).json({
-             message: "Checkout session created",
+            message: "Checkout session created",
             url: session.url
 
         })
     } catch (error) {
+        console.log(error)
         return res.status(500).json({
             error: error,
             message: "error in getting plan"

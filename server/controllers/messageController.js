@@ -17,7 +17,7 @@ const textMesageController = async (req, res) => {
         }
         const { chatId } = req.params
         const { prompt } = req.body
-        const chat = await chatModel.findOne({ _id: chatId, userId },)
+        const chat = await chatModel.findOne({userId, _id: chatId },)
         if (!chat) {
             return res.status(404).json({ message: "Chat not found" })
         }
@@ -32,12 +32,13 @@ const textMesageController = async (req, res) => {
             ],
         });
         const reply = { ...choices[0].message, isImage: false, timestamp: Date.now() }
-        res.json({ sucess: true, reply })
+        res.json({ success: true, reply })
         chat.messages.push(reply);
         await chat.save();
         await userModel.updateOne({ _id: userId }, { $inc: { credits: -1 } })
     } catch (error) {
-        return res.status(500).json({
+         res.json({
+            success:false,
             message: error.message
         })
     }

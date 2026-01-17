@@ -5,20 +5,20 @@ import { AppContextData } from "../context/AppContext";
 import toast from "react-hot-toast";
 
 const Credits = () => {
-  const { axios } = useContext(AppContextData)
+  const { axios, token } = useContext(AppContextData)
   const [plans, setPlans] = useState(null);
   const [loading, setLoading] = useState(true);
   const fetchPlans = async () => {
 
     try {
-      const { data } = await axios.get("/api/credits/plans")
-      
-      if (data) {
+      const { data } = await axios.get("/api/credits/plans", { headers: { Authorization: token } })
+
+      if (data.success) {
         setPlans(data.plans);
 
       }
       else {
-        toast.error(data.message)
+        toast.error(data.message || "failed to fetch plans")
       }
     } catch (error) {
       toast.error(error.message)
@@ -28,22 +28,24 @@ const Credits = () => {
   useEffect(() => {
     fetchPlans();
   }, []);
- 
-  const purchasePlan=async(planId)=>{
+
+  const purchasePlan = async (planId) => {
     try {
-      const {data}=await axios.post(`/api/credits/purchase/${planId}`)
-      console.log(data)
-     if(data){
-      window.location.href=data.url
-     }
-     else{
-      toast.error(data.message)
-    }
-  } catch (error) {
+      const { data } = await axios.post(`/api/credits/purchase/${planId}`, { headers: { Authorization: token } })
+
+      if (data.success) {
+        window.location.href = data.url
+      }
+      else {
+        toast.error(data.message)
+      }
+    } catch (error) {
       toast.error(error.message)
-      
+
     }
   }
+
+
 
 
 
@@ -64,7 +66,7 @@ const Credits = () => {
               : "bg-white dark:bg-transparent"
               }`}
           >
-               { console.log(plan._id)}
+
             <div className="flex-1 ">
               <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2 ">
                 {" "}
@@ -82,7 +84,7 @@ const Credits = () => {
                 ))}
               </ul>
             </div>
-            <button onClick={()=>purchasePlan(plan._id)} className="mt-6 bg-purple-600 hover:bg-purple-700 active:bg-purpIe-800 text-white font-medium py-2 rounded transition-colors cursor-pointer">
+            <button onClick={() => toast.promise(purchasePlan(plan._id), { loading: "processing" })} className="mt-6 bg-purple-600 hover:bg-purple-700 active:bg-purpIe-800 text-white font-medium py-2 rounded transition-colors cursor-pointer">
               Buy Now
             </button>
           </div>

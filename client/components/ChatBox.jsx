@@ -6,7 +6,7 @@ import toast from "react-hot-toast";
 
 const ChatBox = () => {
   const containerRef = useRef(null)
-  const { selectedChat, theme, user, setUser, axios } = useContext(AppContextData);
+  const { selectedChat, theme, user, setUser, axios ,setToken,token} = useContext(AppContextData);
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(false);
   const [mode, setMode] = useState("text");
@@ -24,12 +24,12 @@ const ChatBox = () => {
       setLoading(true)
       const promptCopy = prompt
       setprompt('')
-      setMessages(prev => [...prev, { role: "user", content: prompt, timestamp: Date.now(), isImage: false }])
-      const { data } = await axios.post(`/api/message/${mode}/${selectedChat._id}`, { prompt, isPublished })
-      if (data) {
+      setMessages(prev => [...prev, { role: "user", content: promptCopy, timestamp: Date.now(), isImage: false }])
+      const { data } = await axios.post(`/api/message/${mode}/${selectedChat._id}`, { prompt, isPublished },{headers:{Authorization:token}})
+      if (data.success) {
         setMessages(prev => [...prev, data.reply])
         // decrease credits
-        if (mode === 'text') {
+        if (mode === 'image') {
           setUser(prev => ({ ...prev, credits: prev.credits - 2 }))
         }
         else {
@@ -56,6 +56,7 @@ const ChatBox = () => {
       setMessages(selectedChat.messages)
     }
   },[selectedChat])
+
   useEffect(() => {
     if (containerRef.current) {
       containerRef.current.scrollTo({
@@ -102,7 +103,7 @@ const ChatBox = () => {
         {/* promt input*/}
         <form onSubmit={onSubmit} className=' bg-primary/20 dark:bg-[#583C79]/30 border border-primary dark:border-[80609F]/30 rounded-full w-full max-w-2xl p-3 pl-4 mx-auto flex gap-4 items-center' >
           <select
-            onClick={(e) => {
+            onChange={(e) => {
               setMode(e.target.value);
             }}
             className="text-sm pl-3 pr-2 outline-none"

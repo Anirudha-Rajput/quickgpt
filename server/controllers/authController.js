@@ -15,23 +15,18 @@ const registerController = async (req, res) => {
         const newUser = await userModel.create({
             name, email, password
         })
-        let token = JWT.sign({ id: newUser._id }, process.env.JWT_SECRET, { expiresIn: "30m" })
-        res.cookie("token", token, {
-            httpOnly: true,
-            sameSite: "lax",
-            secure: false, // true in production
-            maxAge: 7 * 24 * 60 * 60 * 1000,
-        });
-        return res.status(201).json({
-            message: "user registered successfully",
-            user: newUser
+        let token = JWT.sign({ id: newUser._id }, process.env.JWT_SECRET, { expiresIn: "24h" })
+
+        res.json({
+            success: true,
+            token
         })
     } catch (error) {
         console.log(error)
+        return res.json({
+            success: false,
+            Message: error.message,
 
-        return res.status(500).json({
-            Message: "internal server error",
-            error: error
         })
     }
 
@@ -54,56 +49,39 @@ const loginController = async (req, res) => {
             message: 'invalid password'
         })
 
-        let token = JWT.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "30m" })
-        res.cookie("token", token, {
-            httpOnly: true,
-            sameSite: "lax",
-            secure: false, // true in production
-            maxAge: 7 * 24 * 60 * 60 * 1000,
-        });
-        return res.status(201).json({
-            message: "user logged in successfully",
-            user: user
-        })
+        let token = JWT.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "24h" })
+
+        return res.json(
+            {
+                success: true,
+                message: "user logged in successfully",
+                token
+            })
     } catch (error) {
         console.log(error)
-        return res.status(500).json({
-            Message: "internal server error",
-            error: error
+        return res.json({
+            success: false,
+            Message: error.message,
+
         })
     }
 }
 
-const logoutController = async (req, res) => {
-    try {
-        res.clearCookie("token", {
-            httpOnly: true,
-            sameSite: "lax",
-            secure: false, // true in production (https)
-        });
 
-        return res.status(200).json({
-            message: "Logged out successfully"
-        });
-    } catch (error) {
-        return res.status(500).json({
-            message: "Logout failed",
-            error: error.message
-        });
-    }
-};
 
 const getUserController = async (req, res) => {
     try {
 
         let user = req.user;
-        return res.status(200).json({
-            message: "user fetched",
-            user: user
+        return res.json({
+            success: true,
+            user
         })
     } catch (error) {
         console.log(error)
         return res.status(500).json({
+            success: false,
+
             Message: "internal server error",
             error: error
         })
@@ -129,14 +107,16 @@ const getPublishedImages = async (req, res) => {
             }
         ])
         return res.status(200).json({
+            success: true,
             images: publishedImageMessages.reverse()
         })
     } catch (error) {
         console.log(error)
         return res.status(500).json({
-            message: "Failed to fetch published images",
-            error: error.message
+            success: false,
+            message: error.message,
+
         })
     }
 }
-module.exports = { registerController, loginController, logoutController, getUserController, getPublishedImages }
+module.exports = { registerController, loginController, getUserController, getPublishedImages }

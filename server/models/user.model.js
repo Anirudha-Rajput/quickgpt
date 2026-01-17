@@ -29,7 +29,7 @@ userSchema.pre("save", async function () {  // Remove (next) parameter
 });
 
 
-const userModel = mongoose.model("User", userSchema)
+const userModel = mongoose.model("user", userSchema)
 module.exports = userModel;
 
 

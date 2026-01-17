@@ -12,7 +12,7 @@ import Login from "../pages/Login";
 import {Toaster} from 'react-hot-toast'
 const App = () => {
   const data = useContext(AppContextData);
-  const { user,loadingUser ,} = useContext(AppContextData);
+  const { user,loadingUser } = useContext(AppContextData);
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 

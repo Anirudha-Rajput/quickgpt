@@ -1,7 +1,7 @@
 const chatModel = require("../models/chat.model");
 
 const createChatController = async (req, res) => {
-    console.log("chali")
+
     try {
         const userId = req.user._id
         console.log(req.user)
@@ -13,22 +13,18 @@ const createChatController = async (req, res) => {
         }
 
 
-        await chatModel.create({
-            userId,
-            messages: [],
-            name: "New Chat",
-            userName: req.user.name
-        })
-        return res.status(200).json({
+        await chatModel.create(chatData)
+        res.json({
+            success: true,
             message: "chat created",
             chat: chatData
         })
 
     } catch (error) {
         console.log(error)
-        return res.status(500).json({
-            messgae: "internal server error",
-            error: error
+        return res.json({
+            success: false,
+            messgae: error.message,
         })
     }
 }
@@ -39,35 +35,35 @@ const getChatController = async (req, res) => {
 
         const userId = req.user._id;
         const chats = await chatModel.find({ userId }).sort({ updateAt: -1 })
-        return res.status(201).json({
-            message: "chat fetched",
-            chat:chats
+        res.json({
+            success: true,
+            chats
         })
 
     } catch (error) {
-        return res.status(500).json({
-            messgae: "internal server error",
-            error: error
+        return res.json({
+            success: false,
+            messgae: error.message
+
         })
     }
 }
 
 const deleteChatController = async (req, res) => {
     try {
-
-        const userId = req.user._id;
-        const {chatId} = req.params;
+       const userId = req.user._id;
+        const { chatId } = req.params;
         await chatModel.findByIdAndDelete({ _id: chatId, userId })
-        return res.status(201).json({
+        res.json({
+            success: true,
             message: "chat deleted",
-
         })
 
     } catch (error) {
         console.log(error)
-        return res.status(500).json({
-            messgae: "internal server error",
-            error: error
+        res.json({
+            success: false,
+            messgae: error.message,
         })
     }
 }
